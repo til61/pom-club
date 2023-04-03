@@ -1,1 +1,1 @@
-web: gunicorn — bind 0.0.0.0:$PORT app:app
+web: export FLASK_APP=app && flask initdb && flask run --port $PORT --host 0.0.0.0
