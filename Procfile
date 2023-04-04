@@ -1,1 +1,1 @@
-web: gunicorn app.__init__:app --bind 0.0.0.0:$PORT --env FLASK_ENV=production
+web: gunicorn app.runner:app --bind 0.0.0.0:$PORT --env FLASK_ENV=production
