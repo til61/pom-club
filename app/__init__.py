@@ -12,7 +12,10 @@ def create_app():
     app = Flask(__name__)
 
     if os.environ.get('FLASK_ENV') == 'production':
-        app.config.from_pyfile('config_prod.py')
+        secret_key = os.environ.get('SECRET_KEY')
+        db_uri = os.environ.get('SQLALCHEMY_DATABASE_URI')
+        app.config['SECRET_KEY'] = secret_key
+        app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
     else:
         app.config.from_pyfile('config.py')
         # print mail config
