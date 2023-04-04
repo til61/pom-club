@@ -1,23 +1,30 @@
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_mail import Mail
 
 # init SQLAlchemy so we can use it later in our models
 db = SQLAlchemy()
+mail = Mail()
 
 def create_app():
     app = Flask(__name__)
 
-    @app.cli.command('initdb')
-    def initdb_command():
-        """Creates the database tables."""
-        db.create_all()
-        print('Initialized the database.')
-
-    app.config['SECRET_KEY'] = 'HJLHjWkUqHX4A5c95bQdeYi8g6BziBRp'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+    if os.environ.get('FLASK_ENV') == 'production':
+        app.config.from_pyfile('config_prod.py')
+    else:
+        app.config.from_pyfile('config.py')
+        # print mail config
+        print(app.config['MAIL_SERVER'])
+        print(app.config['MAIL_PORT'])
+        print(app.config['MAIL_USE_SSL'])
+        print(app.config['MAIL_USERNAME'])
+        print(app.config['MAIL_PASSWORD'])
+        
 
     db.init_app(app)
+    mail.init_app(app)
 
     login_manager = LoginManager()
     login_manager.init_app(app)

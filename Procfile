@@ -1,1 +1,1 @@
-web: export FLASK_APP=app && flask initdb && flask run --port $PORT --host 0.0.0.0
+web: export FLASK_ENV=production && export FLASK_APP=app && flask run --port $PORT --host 0.0.0.0
