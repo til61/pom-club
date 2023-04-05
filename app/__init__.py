@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -11,20 +12,16 @@ mail = Mail()
 def create_app():
     app = Flask(__name__)
 
-    if os.environ.get('FLASK_ENV') == 'production':
-        secret_key = os.environ.get('SECRET_KEY')
-        db_uri = os.environ.get('SQLALCHEMY_DATABASE_URI')
-        app.config['SECRET_KEY'] = secret_key
-        app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
-    else:
-        app.config.from_pyfile('config.py')
-        # print mail config
-        print(app.config['MAIL_SERVER'])
-        print(app.config['MAIL_PORT'])
-        print(app.config['MAIL_USE_SSL'])
-        print(app.config['MAIL_USERNAME'])
-        print(app.config['MAIL_PASSWORD'])
-        
+    load_dotenv()
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_ECHO'] = False
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 465
+    app.config['MAIL_USE_SSL'] = True
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 
     db.init_app(app)
     mail.init_app(app)
@@ -46,5 +43,9 @@ def create_app():
     # blueprint for non-auth parts of app
     # from .main import main as main_blueprint
     # app.register_blueprint(main_blueprint)
+
+    # blueprint for admin and debugging
+    from .admin import admin as admin_blueprint
+    app.register_blueprint(admin_blueprint)
 
     return app
