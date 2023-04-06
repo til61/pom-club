@@ -36,7 +36,7 @@ def create_app():
         app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
         app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 
-    print(app.config['SQLALCHEMY_DATABASE_URI'])
+    # print(app.config['SQLALCHEMY_DATABASE_URI'])
 
     db.init_app(app)
     mail.init_app(app)
