@@ -23,7 +23,8 @@ def login():
         login_user(user)
         token = jwt.encode({'user_id': user.id}, secret_key, algorithm='HS256')
         session['token'] = token
-        return jsonify({"message": "Login successful"}), 200
+        return jsonify({"message": "Login successful",
+                        "token": token}), 200
     
     return jsonify({"message": "Missing JSON in request"}), 400
 
@@ -38,9 +39,9 @@ def signup():
         # check if user already exists
         user_by_name = User.query.filter_by(username=username).first()
         if user_by_name:
-            return jsonify({"message": "Username already exists"}), 401
+            return jsonify({"message": "Username already exists"}), 409
         if password.__len__() < 8:
-            return jsonify({"message": "Password must be at least 8 characters long"}), 401
+            return jsonify({"message": "Password must be at least 8 characters long"}), 400
 
         code = secrets.token_hex(4)
         msg = Message('Verify your email', sender='972648237@qq.com', recipients=[email])

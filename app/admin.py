@@ -18,9 +18,13 @@ def get_status():
 # def get_comments():
 #     pass
 
-@admin.route("/checklogin")
+@admin.route("/checklogin", methods=['POST'])
 def check_login():
+    token = request.json.get('token', None)
     if 'token' in session:
-        return jsonify({"message": "logged in"}), 200
+        if token == session['token']:
+            return jsonify({"message": "JWT secured"}), 200
+        else:
+            return jsonify({"message": "JWT mismatch"}), 409
     else:
         return jsonify({"message": "not logged in"}), 401
