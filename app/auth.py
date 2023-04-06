@@ -5,8 +5,11 @@ from .models import User
 from . import db, mail
 from flask_mail import Mail, Message
 import secrets
+import jwt
+import os
 
 auth = Blueprint('auth', __name__)
+secret_key = os.getenv('SECRET_KEY')
 
 @auth.route('/login', methods=['POST'])
 def login():
@@ -18,6 +21,8 @@ def login():
         if not user or not check_password_hash(user.password, password):
             return jsonify({"message": "Bad username or password"}), 401  # unauthorized
         login_user(user)
+        token = jwt.encode({'user_id': user.id}, secret_key, algorithm='HS256')
+        session['token'] = token
         return jsonify({"message": "Login successful"}), 200
     
     return jsonify({"message": "Missing JSON in request"}), 400
@@ -38,8 +43,8 @@ def signup():
             return jsonify({"message": "Password must be at least 8 characters long"}), 401
 
         code = secrets.token_hex(4)
-        msg = Message('Verify your email', sender='til61atg@gmail.com', recipients=[email])
-        msg.body = f"Your verification code is {code}"
+        msg = Message('Verify your email', sender='972648237@qq.com', recipients=[email])
+        msg.body = f"(波姆社)您的验证码是：{code}，没有时间戳，不急不急，邮箱有人看，反馈bug发到这个地址"
         mail.send(msg)
         # store user data in session
         session['username'] = username
@@ -56,7 +61,7 @@ def verify():
     if request.is_json:
         code = request.json.get('code', None)
         if code == session['code']:
-            new_user = User(username=session['username'], password=session['password'], email=session['email'])
+            new_user = User(username=session['username'], password=session['password'], email=session['email'], role='user')
             db.session.add(new_user)
             db.session.commit()
             return jsonify({"message": "User verified successfully"}), 200
@@ -69,4 +74,5 @@ def verify():
 @login_required
 def logout():
     logout_user()
+    session.pop('token', None)
     return jsonify({"message": "User logged out successfully"}), 200
