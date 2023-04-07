@@ -1,7 +1,7 @@
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from . import db
 
 class User(UserMixin, db.Model):
@@ -42,4 +42,6 @@ class Comment(db.Model):
     author_id = Column(Integer, ForeignKey('users.id'))
     post_id = Column(Integer, ForeignKey('posts.id'))
     parent_id = Column(Integer, ForeignKey('comments.id'))
-    parent = relationship('Comment', remote_side=[id])
+    children = relationship('Comment', cascade='all, delete-orphan',
+                        backref=backref('parent', remote_side=[id]),
+                        lazy='dynamic')

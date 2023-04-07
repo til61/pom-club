@@ -1,0 +1,19 @@
+{% if comment.parent_comment %}
+  <div class="ml-4">
+{% else %}
+  <div>
+{% endif %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <p class="card-text">{{ comment.content }}</p>
+      <p class="card-text"><small class="text-muted">Posted by {{ comment.author.username }} on {{ comment.timestamp.strftime('%B %d, %Y') }}</small></p>
+    </div>
+    {% if comment.image_link %}
+      <img src="{{ comment.image_link }}" class="card-img-bottom" alt="{{ comment.author.username }}">
+    {% endif %}
+  </div>
+
+  {% for child in comment.children %}
+    {% include "comment.html" with comment=child %}
+  {% endfor %}
+</div>

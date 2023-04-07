@@ -1,5 +1,5 @@
 from flask_login import login_user, login_required, logout_user
-from flask import Blueprint, request, jsonify, session, current_app
+from flask import Blueprint, request, jsonify, session, current_app, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
 from . import db, mail
@@ -23,6 +23,7 @@ def login():
         login_user(user)
         token = jwt.encode({'user_id': user.id}, secret_key, algorithm='HS256')
         session['token'] = token
+        session['role'] = user.role
         return jsonify({"message": "Login successful",
                         "token": token}), 200
     

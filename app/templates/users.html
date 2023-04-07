@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}All Users{% endblock %}
+
+{% block content %}
+  <h1>All Users</h1>
+  <table class="table">
+	<thead>
+	  <tr>
+		<th>ID</th>
+		<th>Username</th>
+		<th>Email</th>
+		<th>Role</th>
+        <th>Action</th>
+	  </tr>
+	</thead>
+	<tbody>
+	  {% for user in users %}
+		<tr>
+		  <td>{{ user.id }}</td>
+		  <td>{{ user.username }}</td>
+		  <td>{{ user.email }}</td>
+		  <td>{{ user.role }}</td>
+          {% if user.role == 'user' %}
+          <td>
+            <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="post">
+              <input type="hidden" name="_method" value="DELETE">
+              <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+          </td>
+        {% else %}
+          <td>
+            <button type="button" class="btn btn-danger" disabled>Delete</button>
+          </td>
+        {% endif %}
+		</tr>
+	  {% endfor %}
+	</tbody>
+  </table>
+
+  {% if users.has_prev %}
+	<a href="{{ url_for('admin.show_all_users', page=users.prev_num) }}">Previous</a>
+  {% endif %}
+  {% if users.has_next %}
+	<a href="{{ url_for('admin.show_all_users', page=users.next_num) }}">Next</a>
+  {% endif %}
+{% endblock %}
