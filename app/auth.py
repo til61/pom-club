@@ -44,8 +44,9 @@ def signup():
             return jsonify({"message": "Password must be at least 8 characters long"}), 400
 
         code = secrets.token_hex(4)
-        msg = Message('Verify your email', sender='972648237@qq.com', recipients=[email])
-        msg.body = f"(波姆社)您的验证码是：{code}，没有时间戳，不急不急，邮箱有人看，反馈bug发到这个地址"
+        msg = Message('(波姆社)邮箱地址验证', sender='咕咕菇 <972648237@qq.com>', recipients=[email])
+        msg.body = f"您的验证码是：{code}，有效时间大约30分钟。邮箱有人看，反馈bug也可以发到这个地址。"
+        msg.charset = 'utf-8'
         mail.send(msg)
         # store user data in session
         session['username'] = username
