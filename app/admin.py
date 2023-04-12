@@ -36,19 +36,19 @@ def login():
 
 
 @admin_required
-@admin.route("/users")
+@admin.route("/admin/users")
 def show_all_users():
     users = User.query.paginate(page=1, per_page=10, error_out=False)
     return render_template("users.html", users=users, page=1)
 
 @admin_required
-@admin.route("/posts")
+@admin.route("/admin/posts")
 def show_all_posts():
     posts = Post.query.paginate(page=1, per_page=10, error_out=False)
     return render_template("posts.html", posts=posts, page=1)
 
 @admin_required
-@admin.route("/users/<int:user_id>", methods=['POST'])
+@admin.route("/admin/users/<int:user_id>", methods=['POST'])
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
     db.session.delete(user)
@@ -58,13 +58,15 @@ def delete_user(user_id):
     return render_template("users.html", users, page=1)
 
 @admin_required
-@admin.route("/posts/<int:post_id>", methods=['GET'])
+@admin.route("/admin/posts/<int:post_id>", methods=['GET'])
 def view_post(post_id):
     post = Post.query.get_or_404(post_id)
-    return render_template("post.html", post=post)
+    comments = post.comments
+    top_level_comments = [comment for comment in comments if not comment.parent_id]
+    return render_template("post.html", post=post, top_level_comments=top_level_comments)
 
 @admin_required
-@admin.route("/posts/<int:post_id>", methods=['POST'])
+@admin.route("/admin/posts/<int:post_id>", methods=['POST'])
 def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
     db.session.delete(post)
@@ -74,13 +76,13 @@ def delete_post(post_id):
     return render_template("posts.html", posts, page=1)
 
 
-@admin.route("/checklogin", methods=['POST'])
-def check_login():
-    token = request.json.get('token', None)
-    if 'token' in session:
-        if token == session['token']:
-            return jsonify({"message": "JWT secured"}), 200
-        else:
-            return jsonify({"message": "JWT mismatch"}), 409
-    else:
-        return jsonify({"message": "not logged in"}), 401
+# @admin.route("/admin/checklogin", methods=['POST'])
+# def check_login():
+#     token = request.json.get('token', None)
+#     if 'token' in session:
+#         if token == session['token']:
+#             return jsonify({"message": "JWT secured"}), 200
+#         else:
+#             return jsonify({"message": "JWT mismatch"}), 409
+#     else:
+#         return jsonify({"message": "not logged in"}), 401

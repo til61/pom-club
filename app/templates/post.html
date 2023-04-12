@@ -16,9 +16,13 @@
     {% endif %}
   </div>
 
-  {% for comment in post.comments %}
-    {% include "comment.html" with comment=comment %}
+  {% set displayed_comments = {} %}
+  {% for comment in top_level_comments %}
+    {% with comment=comment %}
+      {% include "comment.html" %}
+    {% endwith %}
+    {% set _ = displayed_comments.update({comment.id: True}) %}
   {% endfor %}
 
-  {% include "new_comment.html" %}
+
 {% endblock %}

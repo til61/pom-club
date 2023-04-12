@@ -17,6 +17,16 @@ class User(UserMixin, db.Model):
     posts = relationship('Post', backref='author', lazy=True)
     comments = relationship('Comment', backref='author', lazy=True)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'role': self.role,
+            'posts': [post.to_dict() for post in self.posts],
+            'comments': [comment.to_dict() for comment in self.comments]
+        }
+
 class Post(db.Model):
     """Model representing a post in the system."""
 
@@ -29,6 +39,17 @@ class Post(db.Model):
     author_id = Column(Integer, ForeignKey('users.id'))
     image_link = Column(Text)
     comments = relationship('Comment', backref='post', lazy=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'content': self.content,
+            'timestamp': self.timestamp.isoformat(),
+            'author_id': self.author_id,
+            'image_link': self.image_link,
+            'comments': [comment.to_dict() for comment in self.comments]
+        }
 
 class Comment(db.Model):
     """Model representing a comment in the system."""
@@ -45,3 +66,15 @@ class Comment(db.Model):
     children = relationship('Comment', cascade='all, delete-orphan',
                         backref=backref('parent', remote_side=[id]),
                         lazy='dynamic')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'content': self.content,
+            'timestamp': self.timestamp.isoformat(),
+            'image_link': self.image_link,
+            'author_id': self.author_id,
+            'post_id': self.post_id,
+            'parent_id': self.parent_id,
+            'children': [child.to_dict() for child in self.children]
+        }

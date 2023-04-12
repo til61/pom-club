@@ -132,3 +132,9 @@ dmypy.json
 
 # Mac .DS_Store files
 .DS_Store
+
+# logging files
+*.log
+
+# debug scripts
+debug.sh

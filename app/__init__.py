@@ -56,8 +56,8 @@ def create_app():
     app.register_blueprint(auth_blueprint)
 
     # blueprint for non-auth parts of app
-    # from .main import main as main_blueprint
-    # app.register_blueprint(main_blueprint)
+    from .post import post as post_blueprint
+    app.register_blueprint(post_blueprint)
 
     # blueprint for admin and debugging
     from .admin import admin as admin_blueprint
