@@ -8,7 +8,7 @@
   <div class="card mb-3">
     <div class="card-body">
       <h5 class="card-title">{{ post.title }}</h5>
-      <p class="card-text">{{ post.content }}</p>
+      <p class="card-text">{{ post.content|safe }}</p>
       <p class="card-text"><small class="text-muted">Posted by {{ post.author.username }} on {{ post.timestamp.strftime('%B %d, %Y') }}</small></p>
     </div>
     {% if post.image_link %}

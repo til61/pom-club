@@ -72,8 +72,10 @@ def delete_post(post_id):
     db.session.delete(post)
     db.session.commit()
     flash('Post deleted successfully!', 'success')
+    page = request.args.get('page', 1, type=int)
     posts = Post.query.paginate(page=1, per_page=10, error_out=False)
-    return render_template("posts.html", posts, page=1)
+    post_list = posts.items
+    return render_template("posts.html", posts=post_list, page=page)
 
 
 # @admin.route("/admin/checklogin", methods=['POST'])
