@@ -25,13 +25,12 @@ def token_required(func):
     @wraps(func)
     def decorated(*args, **kwargs):
         token = request.headers.get('token')
-        logger.info(token)
 
         if not token:
-            return jsonify({'error': 'Token is missing'}), 401
+            return jsonify({'message': 'Token is missing'}), 401
         
         if token != session.get('token'):
-            return jsonify({'error': 'Invalid token'}), 401
+            return jsonify({'message': 'Invalid token'}), 401
 
         return func(*args, **kwargs)
 
@@ -45,7 +44,7 @@ def add_post():
 
     # Ensure that required fields are present in the request
     if not all(key in data for key in ['title', 'content']):
-        return jsonify({'error': 'Missing required fields'}), 400
+        return jsonify({'message': 'Missing required fields'}), 400
     
     author_id = current_user.id
 
@@ -78,7 +77,7 @@ def get_post(post_id):
     post = Post.query.get(post_id)
 
     if not post:
-        return jsonify({'error': 'Post not found'}), 404
+        return jsonify({'message': 'Post not found'}), 404
 
     post_dict = post.to_dict()
     comments = get_comments(post.comments)
@@ -94,7 +93,7 @@ def get_posts_by_author(author_id):
     author = User.query.get(author_id)
 
     if not author:
-        return jsonify({'error': 'Author not found'}), 404
+        return jsonify({'message': 'Author not found'}), 404
 
     posts = Post.query.filter_by(author_id=author_id).all()
 
@@ -117,7 +116,7 @@ def add_comment(post_id):
     post = Post.query.get(post_id)
 
     if not post:
-        return jsonify({'error': 'Post not found'}), 404
+        return jsonify({'message': 'Post not found'}), 404
 
     data = request.get_json()
     content = data.get('content')
@@ -125,13 +124,13 @@ def add_comment(post_id):
     parent_id = data.get('parent_id')
 
     if not content:
-        return jsonify({'error': 'Comment content is required'}), 400
+        return jsonify({'message': 'Comment content is required'}), 400
 
     if parent_id:
         parent_comment = Comment.query.get(parent_id)
 
         if not parent_comment:
-            return jsonify({'error': 'Parent comment not found'}), 404
+            return jsonify({'message': 'Parent comment not found'}), 404
 
         comment = Comment(
             content=content, 
@@ -151,7 +150,7 @@ def add_comment(post_id):
     db.session.add(comment)
     db.session.commit()
 
-    return jsonify({'comment_id': comment.id}), 201
+    return jsonify({'message': comment.id}), 201
 
 
 
