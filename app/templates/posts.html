@@ -22,11 +22,11 @@
           <td>{{ post.author.username }}</td>
           <td>{{ post.timestamp.isoformat() }}</td>
           <td>
-          <a href="{{ url_for('admin.view_post', post_id=post.id) }}" class="btn btn-primary">View</a>
-          <form action="{{ url_for('admin.delete_post', post_id=post.id) }}" method="post">
-            <input type="hidden" name="_method" value="DELETE">
-            <button class="btn btn-danger">Delete</button>
-          </form>
+            <a href="{{ url_for('admin.view_post', post_id=post.id) }}" class="btn btn-primary">View</a>
+            <a href="{{ url_for('admin.delete_post', post_id=post.id) }}" class="btn btn-danger" onclick="event.preventDefault(); document.getElementById('delete-form').submit();">Delete</a>
+            <form id="delete-form" action="{{ url_for('admin.delete_post', post_id=post.id) }}" method="post" style="display: none;">
+              <input type="hidden" name="_method" value="DELETE">
+            </form>
           </td>
         </tr>
       {% endfor %}
