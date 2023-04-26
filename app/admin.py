@@ -54,8 +54,10 @@ def delete_user(user_id):
     db.session.delete(user)
     db.session.commit()
     flash('User deleted successfully!', 'success')
+    page = request.args.get('page', 1, type=int)
     users = User.query.paginate(page=1, per_page=10, error_out=False)
-    return render_template("users.html", users, page=1)
+    users_list = users.items
+    return render_template("users.html", users=users_list, page=page)
 
 @admin_required
 @admin.route("/admin/posts/<int:post_id>", methods=['GET'])

@@ -78,3 +78,4 @@ class Comment(db.Model):
             'parent_id': self.parent_id,
             'children': [child.to_dict() for child in self.children]
         }
+    
