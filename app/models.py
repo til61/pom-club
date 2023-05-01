@@ -79,3 +79,41 @@ class Comment(db.Model):
             'children': [child.to_dict() for child in self.children]
         }
     
+class UserPostHistory(db.Model):
+    """Model representing a user's post history in the system."""
+
+    __tablename__ = 'user_post_history'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    post_id = Column(Integer, ForeignKey('posts.id'))
+    timestamp = Column(DateTime)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'post_id': self.post_id,
+            'timestamp': self.timestamp
+        }
+
+
+class Upvote(db.Model):
+    """Model representing an upvote in the system."""
+
+    __tablename__ = 'upvotes'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    post_id = Column(Integer, ForeignKey('posts.id'))
+    comment_id = Column(Integer, ForeignKey('comments.id'))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'post_id': self.post_id,
+            'comment_id': self.comment_id
+        }
+
+    
