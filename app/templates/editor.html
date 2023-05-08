@@ -1,0 +1,49 @@
+<html>
+<head>
+  <title>Markdown Previewer</title>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <textarea id="input"></textarea>
+  <div id="preview"></div>
+
+  <script>
+    // Create a new instance of markdown-it
+    const md = window.markdownit({
+      html: true,
+      breaks: true,
+      linkify: true,
+      typographer: true,
+      quotes: '“”‘’',
+    });
+
+    // Get references to the input and preview elements
+    const input = document.getElementById('input');
+    const preview = document.getElementById('preview');
+
+    // Add an event listener to the input element to update the preview
+    input.addEventListener('input', () => {
+      // Get the Markdown text from the input element
+      let markdown = input.value;
+
+      // Convert the Markdown to HTML using the markdown-it instance
+      let html = md.render(markdown);
+
+      // Update the preview element with the generated HTML
+      preview.innerHTML = html;
+
+      // Render math using MathJax
+      MathJax.typeset();
+    });
+  </script>
+</body>
+</html>

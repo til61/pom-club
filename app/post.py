@@ -7,7 +7,7 @@ import os
 import jwt
 import logging
 from logging.handlers import RotatingFileHandler
-import random
+from sqlalchemy.sql.expression import func
 
 post = Blueprint('post', __name__)
 secret_key = os.getenv('SECRET_KEY')
@@ -246,10 +246,19 @@ def get_home():
         recommended_posts += get_recommendations_based_on_history(user_id, 5-len(recommended_posts))
     
     latest_posts = Post.query.order_by(Post.timestamp.desc()).limit(3).all()
-    random_posts = Post.query.order_by(random()).limit(2).all()
+    random_posts = Post.query.order_by(func.random()).limit(2).all()
 
     combined_posts = recommended_posts + latest_posts + random_posts
     combined_posts = list(set(combined_posts))
+
+    post_data = []
+    for post in combined_posts:
+        post_dict = post.to_dict()
+        post_data.append(post_dict)
+    
+    return jsonify({
+        "code": 1,
+        'posts': post_data}), 200
 
 
 
