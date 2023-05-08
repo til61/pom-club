@@ -28,9 +28,6 @@ def token_required(func):
 
         if not token:
             return jsonify({'message': 'Token is missing'}), 401
-        
-        if token != session.get('token'):
-            return jsonify({'message': 'Invalid token'}), 401
 
         return func(*args, **kwargs)
 
