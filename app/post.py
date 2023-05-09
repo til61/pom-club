@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, render_template, abort, flash
 from .models import User, Post, Comment, UserPostHistory, Upvote
 from . import db
 from datetime import datetime
@@ -73,25 +73,31 @@ def add_post():
         "code": 1,
         'message': 'Post created successfully'}), 201
 
-@post.route('/posts', methods=['GET'])
-@token_required
-def get_posts():
-    posts = Post.query.all()
-    return jsonify([post.to_dict() for post in posts]), 200
+# deprecated because we are moving to MVC
+# @post.route('/posts', methods=['GET'])
+# @token_required
+# def get_posts():
+#     posts = Post.query.all()
+#     return jsonify([post.to_dict() for post in posts]), 200
 
 @post.route('/posts/post=<int:post_id>', methods=['GET'])
 @token_required
-def get_post(post_id):
-    post = Post.query.get(post_id)
+def view_post(post_id):
+    # post = Post.query.get(post_id)
     
-    if not post:
-        return jsonify({
-            "code": 0,
-            'message': 'Post not found'}), 200
+    # if not post:
+    #     return jsonify({
+    #         "code": 0,
+    #         'message': 'Post not found'}), 200
 
-    post_dict = post.to_dict()
-    comments = get_comments(post.comments)
-    post_dict['comments'] = comments
+    # post_dict = post.to_dict()
+    # comments = get_comments(post.comments)
+    # post_dict['comments'] = comments
+
+    post = Post.query.get_or_404(post_id)
+    comments = post.comments
+    top_level_comments = [comment for comment in comments if not comment.parent_id]
+    return render_template("user/post.html", post=post, top_level_comments=top_level_comments)
 
     # add post to user history
     user_id = get_user_id(request.headers.get('token'))
@@ -238,24 +244,11 @@ def get_upvotes(post_id):
 @token_required
 def get_home():
     user_id = get_user_id(request.headers.get('token'))
-    recommended_posts = get_recommendations_for_user(user_id)
-    if len(recommended_posts) < 5:
-        recommended_posts += get_recommendations_based_on_history(user_id, 5-len(recommended_posts))
-    
-    latest_posts = Post.query.order_by(Post.timestamp.desc()).limit(3).all()
-    random_posts = Post.query.order_by(func.random()).limit(2).all()
+    user = User.query.get(user_id)
 
-    combined_posts = recommended_posts + latest_posts + random_posts
-    combined_posts = list(set(combined_posts))
-
-    post_data = []
-    for post in combined_posts:
-        post_dict = post.to_dict()
-        post_data.append(post_dict)
-    
-    return jsonify({
-        "code": 1,
-        'posts': post_data}), 200
+    # for now just get all the posts by time
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(1, 10, False)
+    return render_template('user/home.html', posts=posts, page=1)
 
 
 

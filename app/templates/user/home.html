@@ -1,0 +1,38 @@
+{% extends "user/base.html" %}
+
+{% block title %}home{% endblock %}
+
+{% block content %}
+  <h1>All Posts</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Date Posted</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for post in posts %}
+        <tr>
+          <td>{{ post.id }}</td>
+          <td>{{ post.title }}</td>
+          <td>{{ post.author.username }}</td>
+          <td>{{ post.timestamp.isoformat() }}</td>
+          <td>
+            <a href="{{ url_for('post.view_post', post_id=post.id) }}" class="btn btn-primary">View</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if posts.has_prev %}
+    <a href="{{ url_for('post.get_home', page=posts.prev_num) }}">Previous</a>
+  {% endif %}
+  {% if posts.has_next %}
+    <a href="{{ url_for('post.get_home', page=posts.next_num) }}">Next</a>
+  {% endif %}
+{% endblock %}

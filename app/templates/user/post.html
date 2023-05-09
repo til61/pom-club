@@ -1,0 +1,28 @@
+{% extends "user/base.html" %}
+
+{% block title %}
+  {{ post.title }}
+{% endblock %}
+
+{% block content %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">{{ post.title }}</h5>
+      <p class="card-text">{{ post.content|safe }}</p>
+      <p class="card-text"><small class="text-muted">Posted by {{ post.author.username }} on {{ post.timestamp.strftime('%B %d, %Y') }}</small></p>
+    </div>
+    {% if post.image_link %}
+      <img src="{{ post.image_link }}" class="card-img-bottom" alt="{{ post.title }}">
+    {% endif %}
+  </div>
+
+  {% set displayed_comments = {} %}
+  {% for comment in top_level_comments %}
+    {% with comment=comment %}
+      {% include "user/comment.html" %}
+    {% endwith %}
+    {% set _ = displayed_comments.update({comment.id: True}) %}
+  {% endfor %}
+
+
+{% endblock %}

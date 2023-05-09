@@ -19,7 +19,7 @@
   {% set displayed_comments = {} %}
   {% for comment in top_level_comments %}
     {% with comment=comment %}
-      {% include "comment.html" %}
+      {% include "admin/comment.html" %}
     {% endwith %}
     {% set _ = displayed_comments.update({comment.id: True}) %}
   {% endfor %}

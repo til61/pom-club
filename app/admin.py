@@ -18,12 +18,12 @@ def admin_required(func):
 
 @admin.route("/getstatus")
 def get_status():
-    return render_template("status.html")
+    return render_template("admin/status.html")
 
 @admin.route("/admin", methods=['GET','POST'])
 def login():
     if request.method == 'GET':
-        return render_template("admin.html")
+        return render_template("admin/admin.html")
     if request.method == 'POST':
         username = request.form.get('username', None)
         password = request.form.get('password', None)
@@ -32,20 +32,20 @@ def login():
             abort(403)
         login_user(user)
         session['role'] = user.role
-        return render_template("admin.html")
+        return render_template("admin/admin.html")
 
 
 @admin_required
 @admin.route("/admin/users")
 def show_all_users():
     users = User.query.paginate(page=1, per_page=10, error_out=False)
-    return render_template("users.html", users=users, page=1)
+    return render_template("admin/users.html", users=users, page=1)
 
 @admin_required
 @admin.route("/admin/posts")
 def show_all_posts():
     posts = Post.query.paginate(page=1, per_page=10, error_out=False)
-    return render_template("posts.html", posts=posts, page=1)
+    return render_template("admin/posts.html", posts=posts, page=1)
 
 @admin_required
 @admin.route("/admin/users/<int:user_id>", methods=['POST'])
@@ -57,7 +57,7 @@ def delete_user(user_id):
     page = request.args.get('page', 1, type=int)
     users = User.query.paginate(page=1, per_page=10, error_out=False)
     users_list = users.items
-    return render_template("users.html", users=users_list, page=page)
+    return render_template("admin/users.html", users=users_list, page=page)
 
 @admin_required
 @admin.route("/admin/posts/<int:post_id>", methods=['GET'])
@@ -65,7 +65,7 @@ def view_post(post_id):
     post = Post.query.get_or_404(post_id)
     comments = post.comments
     top_level_comments = [comment for comment in comments if not comment.parent_id]
-    return render_template("post.html", post=post, top_level_comments=top_level_comments)
+    return render_template("admin/post.html", post=post, top_level_comments=top_level_comments)
 
 @admin_required
 @admin.route("/admin/posts/<int:post_id>", methods=['POST'])
@@ -77,7 +77,7 @@ def delete_post(post_id):
     page = request.args.get('page', 1, type=int)
     posts = Post.query.paginate(page=1, per_page=10, error_out=False)
     post_list = posts.items
-    return render_template("posts.html", posts=post_list, page=page)
+    return render_template("admin/posts.html", posts=post_list, page=page)
 
 
 # @admin.route("/admin/checklogin", methods=['POST'])
