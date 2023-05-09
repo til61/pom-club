@@ -247,7 +247,7 @@ def get_home():
     user = User.query.get(user_id)
 
     # for now just get all the posts by time
-    posts = Post.query.order_by(Post.timestamp.desc()).paginate(1, 10, False)
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(page=1, per_page=10, error_out=False)
     return render_template('user/home.html', posts=posts, page=1)
 
 
