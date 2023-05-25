@@ -4,6 +4,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_migrate import Migrate
 
 # init SQLAlchemy so we can use it later in our models
 db = SQLAlchemy()
@@ -12,7 +13,18 @@ mail = Mail()
 def create_app():
     app = Flask(__name__)
 
-    if os.getenv('FLASK_ENV') == "DEBUG":
+    if os.getenv('FLASK_ENV') == 'PRODUCTION':
+        load_dotenv()
+        app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        app.config['SQLALCHEMY_ECHO'] = False
+        app.config['MAIL_SERVER'] = 'smtp.qq.com'
+        app.config['MAIL_PORT'] = 465
+        app.config['MAIL_USE_SSL'] = True
+        app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+        app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+    else:
         app.config['DEBUG'] = True
         load_dotenv()
         app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -24,21 +36,11 @@ def create_app():
         app.config['MAIL_USE_SSL'] = True
         app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
         app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-    else:
-        load_dotenv()
-        app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
-        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        app.config['SQLALCHEMY_ECHO'] = False
-        app.config['MAIL_SERVER'] = 'smtp.qq.com'
-        app.config['MAIL_PORT'] = 465
-        app.config['MAIL_USE_SSL'] = True
-        app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-        app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 
     # print(app.config['SQLALCHEMY_DATABASE_URI'])
 
     db.init_app(app)
+    migrate = Migrate(app, db)
     mail.init_app(app)
 
     login_manager = LoginManager()

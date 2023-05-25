@@ -8,13 +8,44 @@
   <div class="card mb-3">
     <div class="card-body">
       <h5 class="card-title">{{ post.title }}</h5>
-      <p class="card-text">{{ post.content|safe }}</p>
+      <div class="card-text" id="content" style="display: none;">{{ post.content|safe }}</div>
+      <div class="card-text" id="preview"></div>
       <p class="card-text"><small class="text-muted">Posted by {{ post.author.username }} on {{ post.timestamp.strftime('%B %d, %Y') }}</small></p>
     </div>
-    {% if post.image_link %}
-      <img src="{{ post.image_link }}" class="card-img-bottom" alt="{{ post.title }}">
-    {% endif %}
   </div>
+
+  <script>
+    // Create a new instance of markdown-it
+    const md = window.markdownit({
+      html: true,
+      breaks: true,
+      linkify: true,
+      typographer: true,
+      quotes: '“”‘’',
+    });
+
+    const content = document.getElementById('content');
+    console.log(content.innerHTML);
+    const preview = document.getElementById('preview');
+
+    // Function to update the preview
+    function updatePreview() {
+      // Get the Markdown text from the input element
+      let markdown = content.innerHTML;
+
+      // Convert the Markdown to HTML using the markdown-it instance
+      let html = md.render(markdown);
+
+      // Update the preview element with the generated HTML
+      preview.innerHTML = html;
+
+      // Render math using MathJax
+      MathJax.typeset();
+    }
+
+    document.addEventListener('DOMContentLoaded', updatePreview);
+  </script>
+
 
   {% set displayed_comments = {} %}
   {% for comment in top_level_comments %}

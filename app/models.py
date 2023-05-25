@@ -37,7 +37,7 @@ class Post(db.Model):
     content = Column(Text)
     timestamp = Column(DateTime)
     author_id = Column(Integer, ForeignKey('users.id'))
-    image_link = Column(Text)
+    images = relationship('Image', backref='post', lazy=True)
     comments = relationship('Comment', backref='post', lazy=True)
 
     def to_dict(self):
@@ -59,7 +59,7 @@ class Comment(db.Model):
     id = Column(Integer, primary_key=True)
     content = Column(Text)
     timestamp = Column(DateTime)
-    image_link = Column(Text)
+    images = relationship('Image', backref='comment', lazy=True)
     author_id = Column(Integer, ForeignKey('users.id'))
     post_id = Column(Integer, ForeignKey('posts.id'))
     parent_id = Column(Integer, ForeignKey('comments.id'))
@@ -77,6 +77,28 @@ class Comment(db.Model):
             'post_id': self.post_id,
             'parent_id': self.parent_id,
             'children': [child.to_dict() for child in self.children]
+        }
+    
+class Image(db.Model):
+    """Model representing an image in the system."""
+
+    __tablename__ = 'images'
+
+    id = Column(Integer, primary_key=True)
+    image_link = Column(Text, nullable=False)
+    uploader_id = Column(Integer, ForeignKey('users.id'))
+    timestamp = Column(DateTime)
+    post_id = Column(Integer, ForeignKey('posts.id'), nullable=True)
+    comment_id = Column(Integer, ForeignKey('comments.id'), nullable=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'image_link': self.image_link,
+            'uploader_id': self.uploader_id,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'post_id': self.post_id,
+            'comment_id': self.comment_id,
         }
     
 class UserPostHistory(db.Model):

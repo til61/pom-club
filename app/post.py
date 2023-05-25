@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, session, render_template, abort, flash
-from .models import User, Post, Comment, UserPostHistory, Upvote
+from werkzeug.utils import secure_filename
+from .models import User, Post, Comment, UserPostHistory, Upvote, Image
 from . import db
 from datetime import datetime
 from functools import wraps
@@ -8,9 +9,17 @@ import jwt
 import logging
 from logging.handlers import RotatingFileHandler
 from sqlalchemy.sql.expression import func
+import boto3
+import uuid
+from dotenv import load_dotenv
 
 post = Blueprint('post', __name__)
+load_dotenv()
 secret_key = os.getenv('SECRET_KEY')
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi', 'flv'}
+S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
 
 # Create the logger
 logger = logging.getLogger(__name__)
@@ -62,7 +71,6 @@ def add_post():
         content=data['content'],
         author_id=user_id,
         timestamp=datetime.utcnow(),
-        image_link=data.get('image_link')
     )
 
     # Add the new post to the database
@@ -148,7 +156,6 @@ def add_comment(post_id):
 
     data = request.get_json()
     content = data.get('content')
-    image_link = data.get('image_link')
     parent_id = data.get('parent_id')
 
     if not content:
@@ -166,7 +173,6 @@ def add_comment(post_id):
 
         comment = Comment(
             content=content, 
-            image_link=image_link,
             timestamp=datetime.utcnow(),
             author_id=user_id, 
             post_id=post_id, 
@@ -174,7 +180,6 @@ def add_comment(post_id):
     else:
         comment = Comment(
             content=content, 
-            image_link=image_link,
             timestamp=datetime.utcnow(),
             author_id=user_id, 
             post_id=post_id)
@@ -250,6 +255,76 @@ def get_home():
     posts = Post.query.order_by(Post.timestamp.desc()).paginate(page=1, per_page=10, error_out=False)
     return render_template('user/home.html', posts=posts, page=1)
 
+
+@post.route('/uploadImg', methods=['POST'])
+def upload_img():
+    file = request.files['file']
+    if file and file.filename != '':
+        if allowed_file(file.filename):
+            boto_session = boto3.Session(
+                aws_access_key_id=AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=AWS_ACCESS_KEY,
+            )
+            s3 = boto_session.resource('s3')
+            file_extension = file.filename.rsplit('.', 1)[1].lower()
+            filename = str(uuid.uuid4()) + '.' + file_extension
+            s3.Bucket(S3_BUCKET_NAME).put_object(Key=filename, Body=file)
+            return jsonify({
+                "code": 1,
+                'message': filename}), 200
+        else:
+            return jsonify({
+                "code": 0,
+                'message': 'File type not allowed'}), 200
+    else:
+        return jsonify({
+            "code": 0,
+            'message': 'No file found'}), 200
+    
+
+@post.route('/createPost', methods=['GET', 'POST'])
+def create_post():
+    if request.method == "GET":
+        user_id = get_user_id(request.headers.get('token'))
+        session['user_id'] = user_id
+        return render_template('user/editor.html')
+    elif request.method == "POST":
+        user_id = session.get('user_id')
+        title = request.form.get('title')
+        content = request.form.get('content')
+        images = request.form.getlist('images')
+        if not title:
+            return jsonify({
+                "code": 0,
+                'message': 'Post title is required'}), 200
+        if not content:
+            return jsonify({
+                "code": 0,
+                'message': 'Post content is required'}), 200
+        post = Post(title=title, content=content, timestamp=datetime.utcnow(), author_id=user_id)
+        db.session.add(post)
+        db.session.commit()
+        if images:
+            images=images[0].split(',')
+            for image in images:
+                new_image = Image(post_id=post.id, 
+                                  image_link=image,
+                                  timestamp=datetime.utcnow(),
+                                  uploader_id=user_id
+                                  )
+                db.session.add(new_image)
+                db.session.commit()
+        return jsonify({
+            "code": 1,
+            'message': post.id}), 201
+    
+
+
+
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def get_comments(comments):

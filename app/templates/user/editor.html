@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
   <title>Markdown Previewer</title>
@@ -13,8 +14,25 @@
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
-  <textarea id="input"></textarea>
-  <div id="preview"></div>
+  <div>
+    <label for="title">Title</label>
+    <textarea id="title"></textarea>
+  </div>
+  <div>
+    <label for="input">Content</label>
+    <textarea id="input"></textarea>
+  </div>
+  <div>
+    <input type="file" id="fileUpload" name="fileUpload">
+    <button onclick="uploadFile()">Upload File</button>
+  </div>
+  <div>
+    <label for="preview">Preview</label>
+    <div id="preview"></div>
+  </div>
+  <div>
+    <button onclick="send()">Send</button>
+  </div>
 
   <script>
     // Create a new instance of markdown-it
@@ -27,11 +45,14 @@
     });
 
     // Get references to the input and preview elements
+    const title = document.getElementById('title');
     const input = document.getElementById('input');
+    const fileUpload = document.getElementById('fileUpload');
     const preview = document.getElementById('preview');
+    const images = [];
 
-    // Add an event listener to the input element to update the preview
-    input.addEventListener('input', () => {
+    // Function to update the preview
+    function updatePreview() {
       // Get the Markdown text from the input element
       let markdown = input.value;
 
@@ -43,7 +64,62 @@
 
       // Render math using MathJax
       MathJax.typeset();
-    });
+    }
+
+    // Add an event listener to the input element to update the preview
+    input.addEventListener('input', updatePreview);
+
+    async function uploadFile() {
+      const fileInput = document.getElementById('fileUpload');
+      const file = fileInput.files[0];
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+          const response = await fetch(`/uploadImg`, {
+              method: 'POST',
+              body: formData
+          });
+
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          } else {
+              const data = await response.json();
+              console.log(data.message);  // The filename returned from server
+              input.value += `![${data.message}](https://pombucket.s3.ap-northeast-1.amazonaws.com/${data.message})`;
+              images.push(data.message);
+              // Update the preview after changing the input value
+              updatePreview();
+          }
+      } catch (error) {
+          console.error('Error:', error);
+      }
+    }
+
+    async function send() {
+      const formData = new FormData();
+      formData.append('content', input.value);
+      formData.append("title", title.value);
+      formData.append("images", images);
+
+      try {
+          const response = await fetch(`/createPost`, {
+              method: 'POST',
+              body: formData
+          });
+
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          } else {
+              const data = await response.json();
+              console.log(data.message);  // The filename returned from server
+          }
+      } catch (error) {
+          console.error('Error:', error);
+      }
+    }
   </script>
 </body>
 </html>
+

@@ -29,6 +29,21 @@
             </form>
           </td>
         </tr>
+
+        {% if post.images %}
+          <tr>
+            <td></td>
+            <td colspan="4">
+              <div class="row">
+                {% for image in post.images %}
+                  <div class="col-4">
+                    <img src="https://pombucket.s3.ap-northeast-1.amazonaws.com/{{ image.image_link }}" class="img-fluid" alt="{{ image.uploader_id }}">
+                  </div>
+                {% endfor %}
+              </div>
+            </td>
+          </tr>
+        {% endif %}
       {% endfor %}
     </tbody>
   </table>
