@@ -12,6 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.3/purify.min.js"></script>
 </head>
 <body>
   <div>
@@ -59,8 +60,11 @@
       // Convert the Markdown to HTML using the markdown-it instance
       let html = md.render(markdown);
 
-      // Update the preview element with the generated HTML
-      preview.innerHTML = html;
+      // Sanitize the HTML
+      let cleanHtml = DOMPurify.sanitize(html);
+
+      // Update the preview element with the sanitized HTML
+      preview.innerHTML = cleanHtml;
 
       // Render math using MathJax
       MathJax.typeset();

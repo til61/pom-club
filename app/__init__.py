@@ -13,6 +13,8 @@ mail = Mail()
 def create_app():
     app = Flask(__name__)
 
+    # print(os.getenv('FLASK_ENV'))
+
     if os.getenv('FLASK_ENV') == 'PRODUCTION':
         load_dotenv()
         app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
